@@ -1,4 +1,7 @@
+# IDEs
 .idea/
+.vs/
+.vscode/
 
 # Python
 __pycache__/
@@ -21,7 +24,7 @@ build/
 .env
 
 # Project secrets
-firmware/config.json
+config.json
 
 # OS files
 .DS_Store
