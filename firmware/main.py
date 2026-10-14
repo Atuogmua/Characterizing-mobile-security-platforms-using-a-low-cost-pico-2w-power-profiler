@@ -1,5 +1,6 @@
 import network, socket, time, json
 from machine import I2C, Pin, SPI
+import dht
 from ina219 import INA219
 from ssd1306 import SSD1306_I2C
 
@@ -8,7 +9,7 @@ with open("config.json") as f:
     cfg = json.load(f)
 
 # INA219 setup
-i2c = I2C(0, sda=Pin(4), scl=Pin(5), freq=400000)
+i2c = I2C(1, sda=Pin(10), scl=Pin(11), freq=400000)
 ina = INA219(0.1, i2c)
 ina.configure()
 
@@ -17,7 +18,13 @@ OLED_W, OLED_H = 128, 64
 oled = SSD1306_I2C(OLED_W, OLED_H, i2c)
 
 # Button setup
-button = Pin(15, Pin.IN, Pin.PULL_UP)
+button = Pin(12, Pin.IN, Pin.PULL_UP)
+
+# DHT11 temperature sensor setup
+temp_sensor = dht.DHT11(Pin(15))
+ambient_temp = 0.0
+ambient_hum = 0.0
+last_temp_read = 0
 
 # Display modes and state
 MODES = ["graph_current", "graph_voltage", "graph_power", "text"]
@@ -94,6 +101,17 @@ while True:
     ma = ina.current()
     mw = ina.power()
 
+    # Read DHT11 every 2 seconds
+    now = time.ticks_ms()
+    if time.ticks_diff(now, last_temp_read) > 2000:
+        try:
+            temp_sensor.measure()
+            ambient_temp = temp_sensor.temperature()
+            ambient_hum = temp_sensor.humidity()
+        except OSError:
+            pass
+        last_temp_read = now
+
     push(hist_ma, ma)
     push(hist_v, v)
     push(hist_mw, mw)
@@ -101,6 +119,7 @@ while True:
     btn = button.value()
     if btn == 0 and last_btn == 1:
         mode_index = (mode_index + 1) % len(MODES)
+        time.sleep_ms(200)
     last_btn = btn
 
     mode = MODES[mode_index]
@@ -113,7 +132,7 @@ while True:
     else:
         draw_text(v, ma, mw)
 
-    line = f"{time.ticks_ms()},{v:.3f},{ma:.1f},{mw:.1f}\n"
+    line = f"{time.ticks_ms()},{v:.3f},{ma:.1f},{mw:.1f},{ambient_temp},{ambient_hum}\n"
     s.send(line.encode())
 
-    time.sleep(1)
+    time.sleep_ms(100)
