@@ -25,7 +25,7 @@ The instrument was used to profile a Samsung Galaxy A12 running full TCP port sc
 
 Total parts cost: approximately $9–40 USD depending on the region and source.
 
-The wiring diagram is in [`power monitor/electricalScheme.jpg`](power%20monitor/electricalScheme.jpg).
+The wiring diagram is in [`power monitor/electricalScheme.jpg`](power monitor/electricalScheme.jpg).
 
 ## Repository layout
 
