@@ -1,7 +1,7 @@
 import socket
 
 srv = socket.socket()
-srv.bind(("192.168.100.13", 5000))
+srv.bind(("LAPTOP_IP", 5000))
 srv.listen(1)
 conn, addr = srv.accept()
 print(f"Connected: {addr}")
